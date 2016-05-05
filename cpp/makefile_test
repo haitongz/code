@@ -1,0 +1,10 @@
+TARG = file
+OFILES =
+
+CPP = g++ 
+CPPFLAGS = -g -O2 -Wall
+
+default : $(TARG)
+
+$(TARG) : $(TARG).o $(OFILES) 
+	$(CPP) $(CPPFLAGS) -o $(TARG) $(TARG).o $(OFILES)

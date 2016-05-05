@@ -1,0 +1,5 @@
+g++-4.9 -std=c++11 -I /usr/local/Cellar/thrift/0.9.2/include -c TimeService.cpp
+g++-4.9 -std=c++11 -I  /usr/local/Cellar/thrift/0.9.2/include -c WhatTime_constants.cpp
+g++-4.9 -std=c++11 -I  /usr/local/Cellar/thrift/0.9.2/include -c WhatTime_types.cpp
+g++-4.9 -std=c++11 -I  /usr/local/Cellar/thrift/0.9.2/include -c client.cpp
+g++-4.9 -std=c++11 -L /usr/local/Cellar/thrift/0.9.2/lib TimeService.o WhatTime_constants.o WhatTime_types.o client.o -o client -lthrift

@@ -1,0 +1,2 @@
+/Users/haitongz/Code/cpp/cmake_study/Demo3/CMakeFiles/Demo.dir
+/Users/haitongz/Code/cpp/cmake_study/Demo3/math/CMakeFiles/MathFunction.dir

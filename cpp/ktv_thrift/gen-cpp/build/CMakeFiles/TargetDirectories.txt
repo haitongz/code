@@ -1,0 +1,1 @@
+/Users/haitongz/Code/cpp/ktv_thrift/gen-cpp/build/CMakeFiles/client.dir

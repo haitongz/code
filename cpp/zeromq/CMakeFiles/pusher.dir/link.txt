@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/pusher.dir/pusher.cpp.o  -o pusher  -L/usr/local/Cellar/zeromq/4.0.5_2/lib  -lzmq -lpthread -Wl,-rpath,/usr/local/Cellar/zeromq/4.0.5_2/lib 
