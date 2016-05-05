@@ -9,10 +9,28 @@ using namespace std;
 
 const int LOOP_COUNT = 100000;
 
-  inline static char toHex(const char &x)
-  {
-    return x > 9 ? x + 55: x + 48;
-  }
+inline static char toHex(const char &x)
+{
+  return x > 9 ? x + 55: x + 48;
+}
+
+static const uint32_t   uri_component[] = {
+  0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+
+  /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
+  0xfc00dffe, /* 1111 1100 0000 0000  1101 1111 1111 1110 */
+
+  /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
+  0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
+
+  /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
+  0xb8000001, /* 1011 1000 0000 0000  0000 0000 0000 0001 */
+
+  0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+  0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+  0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+  0xffffffff  /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+  };
 
 std::string url_encode(const std::string &str_in)
 {
@@ -21,23 +39,6 @@ std::string url_encode(const std::string &str_in)
   /* " ", "#", "%", "?", %00-%1F, %7F-%FF */
 
   /* 位图法判断是否需要进行编码 */
- static uint32_t   uri_component[] = {
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-
-                 /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
-     0xfc00dffe, /* 1111 1100 0000 0000  1101 1111 1111 1110 */
-
-                 /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
-     0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
-
-                 /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
-     0xb8000001, /* 1011 1000 0000 0000  0000 0000 0000 0001 */
-
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff  /* 1111 1111 1111 1111  1111 1111 1111 1111 */
- };
 
   std::string str_buffer;
   str_buffer.reserve(str_in.size() << 1);
@@ -63,47 +64,28 @@ for (size_t ix = 0; ix < str_in.size(); ix++)
 }
 return str_buffer;
 }
+
 std::string url_encode2(const std::string &str_in)
 {
   static unsigned char   hex[] = "0123456789ABCDEF";
 
-  /* " ", "#", "%", "?", %00-%1F, %7F-%FF */
-
-  /* 位图法判断是否需要进行编码 */
- static uint32_t   uri_component[] = {
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-
-                 /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
-     0xfc00d7ff, /* 1111 1100 0000 0000  1101 0111 1111 1111 */
-
-                 /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
-     0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
-
-                 /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
-     0xb8000001, /* 1011 1000 0000 0000  0000 0000 0000 0001 */
-
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
-     0xffffffff  /* 1111 1111 1111 1111  1111 1111 1111 1111 */
- };
-
   std::string str_buffer;
 for (size_t ix = 0; ix < str_in.size(); ix++)
 {
-  if (uri_component[(unsigned char) str_in[ix] >> 5] & (1 << ((unsigned char) str_in[ix] & 0x1f)))
+  unsigned char x = str_in[ix];
+  if (uri_component[x >> 5] & (1 << (x & 0x1f)))
   {
     str_buffer += '%';
-    str_buffer += hex[(unsigned char) str_in[ix] >> 4];
-    str_buffer += hex[(unsigned char) str_in[ix] & 0xf];
+    str_buffer += hex[x >> 4];
+    str_buffer += hex[x & 0xf];
   }
-  else if (isspace((unsigned char) str_in[ix]))
+  else if (isspace(x))
   {
     str_buffer += '+';
   }
   else
   {
-    str_buffer += str_in[ix];
+    str_buffer += x;
   }
 }
 return str_buffer;
@@ -145,6 +127,7 @@ std::string UrlEncoding(const std::string &str_in, bool igore_percent_sign)
   }
   return str_buffer.str();
 }
+
 std::string UrlEncoding2(const std::string &str_in, bool igore_percent_sign)
 {
   std::string str_buffer;
@@ -280,7 +263,7 @@ int main ()
   string encoded_url;
   for (int i = 0; i < LOOP_COUNT; ++i)
   {
-    encoded_url = url_encode(s);
+    encoded_url = url_encode2(s);
   }
   std::cout << encoded_url << std::endl;
   gettimeofday(&end, NULL);
