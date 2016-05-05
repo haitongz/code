@@ -116,14 +116,16 @@ int main(int argc, char *argv[])
   {
     a = Base64Encode(s);
   }
+  std::cout << "base64encoded: " << a << std::endl;
   gettimeofday(&end, NULL);
-  std::cout << " timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << "Base64Encode timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
   gettimeofday(&start, NULL);
   for (int i = 0; i < LOOP_COUNT; ++i)
   {
     a = Base64Encode1(s);
   }
+  std::cout << "base64encoded: " << a << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
   return 0;
