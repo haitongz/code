@@ -16,7 +16,7 @@ const int LOOP_COUNT = 100000;
 
 std::string url_encode(const std::string &str_in)
 {
-  static u_char   hex[] = "0123456789ABCDEF";
+  static unsigned char   hex[] = "0123456789ABCDEF";
 
   /* " ", "#", "%", "?", %00-%1F, %7F-%FF */
 
@@ -65,7 +65,7 @@ return str_buffer;
 }
 std::string url_encode2(const std::string &str_in)
 {
-  static u_char   hex[] = "0123456789ABCDEF";
+  static unsigned char   hex[] = "0123456789ABCDEF";
 
   /* " ", "#", "%", "?", %00-%1F, %7F-%FF */
 
