@@ -7,7 +7,7 @@
 #include "modp_b64.h"
 
 using namespace std;
-const int LOOP_COUNT = 1;
+const int LOOP_COUNT = 100000;
 
 static const uint8_t kBase64DecodeTable[256] ={
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
@@ -137,7 +137,7 @@ std::string Base64Encode2(const std::string& src, std::string ending = "")
 
 std::string Base64Encode3(const std::string& src, std::string ending = "")
 {
-  uint8_t i = 0;
+  uint32_t i = 0;
   uint8_t b[4];
   const uint8_t *bytes = (const uint8_t *) src.c_str();
   uint32_t len = src.length();
@@ -145,8 +145,6 @@ std::string Base64Encode3(const std::string& src, std::string ending = "")
   std::string s;
   s.reserve(len/3*4 + 4);
   uint32_t encode_len = (len/3)*4;
-  std::cout << len%3 << std::endl;
-  std::cout << encode_len << std::endl;
   uint8_t c[encode_len];
 
   while (len >= 3)
@@ -158,7 +156,7 @@ std::string Base64Encode3(const std::string& src, std::string ending = "")
   }
   if (encode_len)
   {
-    s.append(reinterpret_cast<char const*>(c));
+    s.append(reinterpret_cast<char const*>(c), encode_len);
   }
 
   if (len > 0)
@@ -223,10 +221,10 @@ int main(int argc, char *argv[])
     //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comagent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4)"
     //"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36lang:en,zh-CN;q=0.8,zh;q=0.6,zh-TW;q=0.4referer:http://ckmap.mediav.com/b?type=10proxy:106.39.88.82, 202.79.203.111_mvctn191270=_mvsrc=118216_523698_1043440&_mvcam=191270_1241961_11970810_58740969_0&osr=oqdT0qhmgzj0&time=1449650466&rdom=anonymous; _mvctn165564=_mvsrc=118478_524001_1044112&_mvcam=165564_1224948_11775153_58841999_0&osr=Zg4c0cS49V00&time=1451040575&rdom=anonymous; v=)he((]^XdqB2fOE=[AjT; _jzqa=1.4336274511317232000.1447337529.1447337529.1461045516.2; _jzqc=1; _jzqckmp=1; ckmts=PUPtXAzi,P6PtXAzi,RGPtXAzi,R6PtXAzi,U6PtXAzi,JGPtXAzi,JrPtXAzi,J6PtXAzi,bUPtXAziver10:0|0:0|0:0|0:10p!"
     //"version1.01";
-  //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts"
-    //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comab";
-  //std::string s = "abaafsaflsafjsalfjsal fts  ";
-  std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comag";
+  std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9tsaaa"
+    "1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.com";
+  //std::string s = "baafsa";
+  //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comaag";
   string a;
   struct timeval start, end;
   gettimeofday(&start, NULL);
@@ -267,17 +265,6 @@ int main(int argc, char *argv[])
   std::cout << "base64encoded: " << f << "!" << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode3 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
-
-  //string l;
-  //gettimeofday(&start, NULL);
-  //for (int i = 0; i < LOOP_COUNT; ++i)
-  //{
-    //l = Base64Encode3(s);
-  //}
-  //std::cout << "base64encoded: " << l << std::endl;
-  //gettimeofday(&end, NULL);
-  //std::cout << " Base64Encode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
-
 
   string c;
   gettimeofday(&start, NULL);
