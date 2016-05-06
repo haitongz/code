@@ -143,14 +143,41 @@ std::string Base64Encode3(const std::string& src, std::string ending = "")
   uint32_t len = src.length();
 
   std::string s;
+  s.reserve(len*4/3 + 4);
 
   while (len >= 3)
   {
     base64_encode(bytes, 3, b);
-    s += b[0];
-    s += b[1];
-    s += b[2];
-    s += b[3];
+    s += b[0] + b[1] + b[2] + b[3];
+    bytes += 3;
+    len -= 3;
+  }
+
+  if (len > 0)
+  {
+    base64_encode(bytes, len, b);
+    s.append(reinterpret_cast<char const*>(b),len+1);
+  }
+
+  s += ending;
+
+  return s;
+}
+
+std::string Base64Encode4(const std::string& src, std::string ending = "")
+{
+  uint8_t i = 0;
+  uint8_t b[4];
+  const uint8_t *bytes = (const uint8_t *) src.c_str();
+  uint32_t len = src.length();
+
+  std::string s;
+  s.reserve(len*4/3 + 4);
+
+  while (len >= 3)
+  {
+    base64_encode(bytes, 3, b);
+    s += b[0] + b[1] + b[2] + b[3];
     bytes += 3;
     len -= 3;
   }
@@ -229,6 +256,17 @@ int main(int argc, char *argv[])
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode3 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
+  string l;
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT; ++i)
+  {
+    l = Base64Encode3(s);
+  }
+  std::cout << "base64encoded: " << l << std::endl;
+  gettimeofday(&end, NULL);
+  std::cout << " Base64Encode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+
   string c;
   gettimeofday(&start, NULL);
   for (int i = 0; i < LOOP_COUNT; ++i)
@@ -237,6 +275,6 @@ int main(int argc, char *argv[])
   }
   std::cout << "base64encoded: " << c << std::endl;
   gettimeofday(&end, NULL);
-  std::cout << " Base64Encode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << " Base64EncodeModp timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
   return 0;
 }
