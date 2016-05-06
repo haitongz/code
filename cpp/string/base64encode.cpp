@@ -113,7 +113,6 @@ std::string Base64Encode2(const std::string& src, std::string ending = "")
 
   std::string s;
   s.reserve(len*4/3 + 4);
-  std::cout << "begin:" << s.capacity() << std::endl;
 
   while (len >= 3)
   {
@@ -132,7 +131,6 @@ std::string Base64Encode2(const std::string& src, std::string ending = "")
   }
 
   s += ending;
-  std::cout << "end:" << s.capacity() << std::endl;
 
   return s;
 }
