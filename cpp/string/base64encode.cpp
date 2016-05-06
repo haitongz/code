@@ -217,12 +217,12 @@ bool Base64EncodeModp(const std::string& input, std::string* output)
 
 int main(int argc, char *argv[])
 {
-  //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts"
-    //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comagent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4)"
-    //"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36lang:en,zh-CN;q=0.8,zh;q=0.6,zh-TW;q=0.4referer:http://ckmap.mediav.com/b?type=10proxy:106.39.88.82, 202.79.203.111_mvctn191270=_mvsrc=118216_523698_1043440&_mvcam=191270_1241961_11970810_58740969_0&osr=oqdT0qhmgzj0&time=1449650466&rdom=anonymous; _mvctn165564=_mvsrc=118478_524001_1044112&_mvcam=165564_1224948_11775153_58841999_0&osr=Zg4c0cS49V00&time=1451040575&rdom=anonymous; v=)he((]^XdqB2fOE=[AjT; _jzqa=1.4336274511317232000.1447337529.1447337529.1461045516.2; _jzqc=1; _jzqckmp=1; ckmts=PUPtXAzi,P6PtXAzi,RGPtXAzi,R6PtXAzi,U6PtXAzi,JGPtXAzi,JrPtXAzi,J6PtXAzi,bUPtXAziver10:0|0:0|0:0|0:10p!"
-    //"version1.01";
-  std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9tsaaa"
-    "1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.com";
+  std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts"
+    "1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comagent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4)"
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36lang:en,zh-CN;q=0.8,zh;q=0.6,zh-TW;q=0.4referer:http://ckmap.mediav.com/b?type=10proxy:106.39.88.82, 202.79.203.111_mvctn191270=_mvsrc=118216_523698_1043440&_mvcam=191270_1241961_11970810_58740969_0&osr=oqdT0qhmgzj0&time=1449650466&rdom=anonymous; _mvctn165564=_mvsrc=118478_524001_1044112&_mvcam=165564_1224948_11775153_58841999_0&osr=Zg4c0cS49V00&time=1451040575&rdom=anonymous; v=)he((]^XdqB2fOE=[AjT; _jzqa=1.4336274511317232000.1447337529.1447337529.1461045516.2; _jzqc=1; _jzqckmp=1; ckmts=PUPtXAzi,P6PtXAzi,RGPtXAzi,R6PtXAzi,U6PtXAzi,JGPtXAzi,JrPtXAzi,J6PtXAzi,bUPtXAziver10:0|0:0|0:0|0:10p!"
+    "version1.01";
+  //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9tsaaa"
+    //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.com";
   //std::string s = "baafsa";
   //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comaag";
   string a;
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
   {
     f = Base64Encode3(s);
   }
-  std::cout << "base64encoded: " << f << "!" << std::endl;
+  std::cout << "base64encoded: " << f << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode3 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
