@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdio.h>
 using namespace std;
-#define OUT_IN_REPEATE_NUM 100000
+#define OUT_IN_REPEATE_NUM 1000000
 #define IN_REPEATE_NUM 60
 
 string s1="abcedfg";
