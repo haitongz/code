@@ -4,7 +4,13 @@
 #include <sstream>
 #include <sys/time.h>
 #include <stdint.h>
-
+//url编码的主要内容是: 0-9A-Za-z以及-, ~, ., ~无需通过编码即可传输(普通字符), 而以下字符(保留字符):
+//! * ‘ ( ) ; : @ & = + $ , / ? # [ ]
+//如果要当作字符常量对待则需要经过编码. 另外其他的字符都需要进过url编码来进行传输.
+//空格" "被转换为加号"+"。
+//其他每个字节都被表示成"%xy"格式的由3个字符组成的字符串，编码为UTF-8。
+//编码形式是%后跟对应的十六进制形式.
+//https://en.wikipedia.org/wiki/Percent-encoding
 using namespace std;
 
 const int LOOP_COUNT = 100000;
@@ -32,6 +38,8 @@ static const uint32_t   uri_component[] = {
   0xffffffff  /* 1111 1111 1111 1111  1111 1111 1111 1111 */
   };
 
+static const unsigned char   hex2[] = "0123456789ABCDEF";
+
 std::string url_encode(const std::string &str_in)
 {
   static unsigned char   hex[] = "0123456789ABCDEF";
@@ -49,7 +57,7 @@ for (size_t ix = 0; ix < str_in.size(); ix++)
   if (uri_component[(unsigned char) str_in[ix] >> 5] & (1 << ((unsigned char) str_in[ix] & 0x1f)))
   {
     buf[0] = '%';
-    buf[1] = hex[(unsigned char) str_in[ix] >> 4];
+    buf[1] = hex[(unsigned char) str_in[ix] >> 4];// ascii bit位用16进行表示
     buf[2] = hex[(unsigned char) str_in[ix] & 0xf];
   }
   else if (isspace((unsigned char) str_in[ix]))
@@ -65,32 +73,34 @@ for (size_t ix = 0; ix < str_in.size(); ix++)
 return str_buffer;
 }
 
+//参考ngx_url_encoding, 主要是使用了位图来巧妙得查询一个字符是否需要encode
 std::string url_encode2(const std::string &str_in)
 {
-  static unsigned char   hex[] = "0123456789ABCDEF";
+  static unsigned char hex[] = "0123456789ABCDEF";
 
   std::string str_buffer;
-for (size_t ix = 0; ix < str_in.size(); ix++)
-{
-  unsigned char x = str_in[ix];
-  if (uri_component[x >> 5] & (1 << (x & 0x1f)))
+  for (size_t ix = 0; ix < str_in.size(); ix++)
   {
-    str_buffer += '%';
-    str_buffer += hex[x >> 4];
-    str_buffer += hex[x & 0xf];
+    unsigned char x = str_in[ix];
+    if (uri_component[x >> 5] & (1 << (x & 0x1f)))
+    {
+      str_buffer += '%';
+      str_buffer += hex[x >> 4];
+      str_buffer += hex[x & 0xf];
+    }
+    else if (isspace(x))
+    {
+      str_buffer += '+';
+    }
+    else
+    {
+      str_buffer += x;
+    }
   }
-  else if (isspace(x))
-  {
-    str_buffer += '+';
-  }
-  else
-  {
-    str_buffer += x;
-  }
-}
-return str_buffer;
+  return str_buffer;
 }
 
+//原始线上代码
 std::string UrlEncoding(const std::string &str_in, bool igore_percent_sign)
 {
   std::stringstream str_buffer;
@@ -127,7 +137,7 @@ std::string UrlEncoding(const std::string &str_in, bool igore_percent_sign)
   }
   return str_buffer.str();
 }
-
+// 使用string 代替stringstream
 std::string UrlEncoding2(const std::string &str_in, bool igore_percent_sign)
 {
   std::string str_buffer;
@@ -164,10 +174,45 @@ std::string UrlEncoding2(const std::string &str_in, bool igore_percent_sign)
   }
   return str_buffer;
 }
-
+// 使用string+=代替char数组操作
 std::string UrlEncoding3(const std::string &str_in, bool igore_percent_sign)
 {
-  static char hex[] = "0123456789ABCDEF";
+  static unsigned char hex[] = "0123456789ABCDEF";
+  std::string str_buffer;
+  for (size_t ix = 0; ix < str_in.size(); ix++)
+  {
+    if (isalnum((unsigned char) str_in[ix]))
+    {
+      str_buffer += str_in[ix];
+    }
+    else if (str_in[ix] == '_')
+    {
+      //FIXME remove enable_new_urlencode
+      str_buffer += str_in[ix];
+    }
+    else if (isspace((unsigned char) str_in[ix]))
+    {
+      str_buffer += '+';
+    }
+     //if the url contains '%', we support it has been encoded. but maybe
+     //wrong. like "%show"
+    else if ( ((unsigned char) str_in[ix]) == '%' && igore_percent_sign)
+    {
+      str_buffer += str_in[ix];
+    }
+    else
+    {
+      str_buffer += '%';
+      str_buffer += hex[(unsigned char) str_in[ix] >> 4];
+      str_buffer += hex[(unsigned char) str_in[ix] & 0xf];
+    }
+  }
+  return str_buffer;
+}
+//提前申请string的大小，避免string内存重新分配造成的内存copy
+std::string UrlEncoding4(const std::string &str_in, bool igore_percent_sign)
+{
+  static unsigned char hex[] = "0123456789ABCDEF";
   std::string str_buffer;
   str_buffer.reserve(str_in.size() << 1);
   for (size_t ix = 0; ix < str_in.size(); ix++)
@@ -201,57 +246,6 @@ std::string UrlEncoding3(const std::string &str_in, bool igore_percent_sign)
   return str_buffer;
 }
 
-std::string UrlEncoding4(const std::string &str_in, bool igore_percent_sign)
-{
-  static char hex[] = "0123456789ABCDEF";
-  std::string str_buffer;
-  str_buffer.reserve(str_in.size() << 1);
-  for (size_t ix = 0; ix < str_in.size(); ix++)
-  {
-    unsigned char x = str_in[ix];
-    if (isalnum(x))
-    {
-      str_buffer += x;
-    }
-    else if (str_in[ix] == '_')
-    {
-      //FIXME remove enable_new_urlencode
-      str_buffer += x;
-    }
-    else if (isspace(x))
-    {
-      str_buffer += '+';
-    }
-     //if the url contains '%', we support it has been encoded. but maybe
-     //wrong. like "%show"
-    else if ((x == '%' && igore_percent_sign))
-    {
-      str_buffer += x;
-    }
-    else
-    {
-      str_buffer += '%';
-      str_buffer += hex[x >> 4];
-      str_buffer += hex[x & 0xf];
-    }
-  }
-  return str_buffer;
-}
-
-//void printf_info()
-//{
-  //struct timeval start, end;
-  //gettimeofday( &start, NULL );
-  //string a;
-  //for (int i = 0; i < 100000; ++i) {
-    //a = url_encode(s);
-  //}
-  //std::cout << "encode_url: " << a << std::endl;
-  //gettimeofday( &end, NULL );
-  //int timeuse = 1000000 * ( end.tv_sec - start.tv_sec ) + end.tv_usec - start.tv_usec;
-  //printf("time: %d us\n", timeuse);
-//}
-
 int main ()
 {
   std::string s1 = "http://mediav.com/?arg1=abc 效果个性化重定向&type=1&x=http://xx.xx";
@@ -277,6 +271,15 @@ int main ()
   std::cout << encoded_url << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " UrlEncoding timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT; ++i)
+  {
+    encoded_url = UrlEncoding2(s, false);
+  }
+  std::cout << encoded_url << std::endl;
+  gettimeofday(&end, NULL);
+  std::cout << " UrlEncoding2 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
   gettimeofday(&start, NULL);
   for (int i = 0; i < LOOP_COUNT; ++i)
