@@ -40,6 +40,7 @@ static const uint32_t   uri_component[] = {
 
 static const unsigned char   hex2[] = "0123456789ABCDEF";
 
+// nginx url encode: http://blog.aka-cool.net/blog/2013/07/09/url-encode-in-nginx
 std::string url_encode(const std::string &str_in)
 {
   static unsigned char   hex[] = "0123456789ABCDEF";

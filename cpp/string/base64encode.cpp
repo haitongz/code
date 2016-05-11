@@ -8,7 +8,7 @@
 
 using namespace std;
 const int LOOP_COUNT = 100000;
-
+// http://blog.csdn.net/morewindows/article/details/11871429
 static const uint8_t kBase64DecodeTable[256] ={
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
@@ -43,7 +43,7 @@ void  base64_encode(const uint8_t *in, uint32_t len, uint8_t *buf) {
     buf[1] = kBase64EncodeTable[(in[0] << 4) & 0x30];
   }
 }
-
+// original encode
 std::string Base64Encode(const std::string& src, std::string ending = "")
 {
   uint8_t i = 0;
@@ -73,7 +73,7 @@ std::string Base64Encode(const std::string& src, std::string ending = "")
 
   return ss.str();
 }
-
+// string 代替stringstream
 std::string Base64Encode1(const std::string& src, std::string ending = "")
 {
   uint8_t i = 0;
@@ -103,8 +103,41 @@ std::string Base64Encode1(const std::string& src, std::string ending = "")
 
   return s;
 }
-
+// string reserve
 std::string Base64Encode2(const std::string& src, std::string ending = "")
+{
+  uint8_t i = 0;
+  uint8_t b[4];
+  const uint8_t *bytes = (const uint8_t *) src.c_str();
+  uint32_t len = src.length();
+
+  uint32_t encode_len = len << 2;
+  std::string s;
+  s.reserve(encode_len);
+
+  while (len >= 3)
+  {
+    base64_encode(bytes, 3, b);
+    for (i = 0; i < 4; i++)
+      s += b[i];
+    bytes += 3;
+    len -= 3;
+  }
+
+  if (len > 0)
+  {
+    base64_encode(bytes, len, b);
+    for (i = 0; i < len + 1; i++)
+      s += b[i];
+  }
+
+  s += ending;
+
+  return s;
+}
+
+// reinterpret_cast, range copy
+std::string Base64Encode3(const std::string& src, std::string ending = "")
 {
   uint8_t i = 0;
   uint8_t b[4];
@@ -117,8 +150,6 @@ std::string Base64Encode2(const std::string& src, std::string ending = "")
   while (len >= 3)
   {
     base64_encode(bytes, 3, b);
-    //for (i = 0; i < 4; i++)
-    //s.append(b[0], 3);
     s.append(reinterpret_cast<char const*>(b),4);
     bytes += 3;
     len -= 3;
@@ -134,8 +165,8 @@ std::string Base64Encode2(const std::string& src, std::string ending = "")
 
   return s;
 }
-
-std::string Base64Encode3(const std::string& src, std::string ending = "")
+// range copy 使用更大的初始数组，encode时数组下标移动,最后一起string copy
+std::string Base64Encode4(const std::string& src, std::string ending = "")
 {
   uint32_t i = 0;
   const uint8_t *bytes = (const uint8_t *) src.c_str();
@@ -170,31 +201,25 @@ std::string Base64Encode3(const std::string& src, std::string ending = "")
   return s;
 }
 
-std::string Base64Encode4(const std::string& src, std::string ending = "")
+std::string Base64Encode5(const std::string& src, std::string ending = "")
 {
-  uint8_t i = 0;
-  uint8_t b[4];
   const uint8_t *bytes = (const uint8_t *) src.c_str();
   uint32_t len = src.length();
 
-  uint32_t encode_len = len << 2;
-  std::string s;
-  s.reserve(encode_len);
+  std::string s((len+2)/3*4 + 1, '\0');
+  char* c = const_cast<char *>(s.data());
 
   while (len >= 3)
   {
-    base64_encode(bytes, 3, b);
-    for (i = 0; i < 4; i++)
-      s += b[i];
+    base64_encode(bytes, 3, (uint8_t *)c);
+    c += 4;
     bytes += 3;
     len -= 3;
   }
 
   if (len > 0)
   {
-    base64_encode(bytes, len, b);
-    for (i = 0; i < len + 1; i++)
-      s += b[i];
+    base64_encode(bytes, len, (uint8_t *)c);
   }
 
   s += ending;
@@ -225,7 +250,8 @@ int main(int argc, char *argv[])
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36lang:en,zh-CN;q=0.8,zh;q=0.6,zh-TW;q=0.4referer:http://ckmap.mediav.com/b?type=10proxy:106.39.88.82, 202.79.203.111_mvctn191270=_mvsrc=118216_523698_1043440&_mvcam=191270_1241961_11970810_58740969_0&osr=oqdT0qhmgzj0&time=1449650466&rdom=anonymous; _mvctn165564=_mvsrc=118478_524001_1044112&_mvcam=165564_1224948_11775153_58841999_0&osr=Zg4c0cS49V00&time=1451040575&rdom=anonymous; v=)he((]^XdqB2fOE=[AjT; _jzqa=1.4336274511317232000.1447337529.1447337529.1461045516.2; _jzqc=1; _jzqckmp=1; ckmts=PUPtXAzi,P6PtXAzi,RGPtXAzi,R6PtXAzi,U6PtXAzi,JGPtXAzi,JrPtXAzi,J6PtXAzi,bUPtXAziver10:0|0:0|0:0|0:10p!"
     "version1.01";
   s = s + s + s;
-  //std::string s = "abcd";
+  //s = "MoreWindows - http://blog.csdn.net/morewindows?viewmode=contents ~!@#$%\r\n";
+  //s = "ab";
   //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9tsaaa"
     //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.com";
   //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comaag";
@@ -279,6 +305,15 @@ int main(int argc, char *argv[])
   std::cout << "base64encoded: " << g << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT; ++i)
+  {
+    g = Base64Encode5(s);
+  }
+  std::cout << "base64encoded: " << g << std::endl;
+  gettimeofday(&end, NULL);
+  std::cout << " Base64Encode5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
   string c;
   gettimeofday(&start, NULL);
