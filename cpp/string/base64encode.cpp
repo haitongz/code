@@ -326,13 +326,24 @@ int main(int argc, char *argv[])
   gettimeofday(&end, NULL);
   std::cout << " Base64EncodeModp timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
-  if(a == b  && b == e && e == g && g == h && h == f)
+  if(a == b  && b == e && e == g && g == f)
   {
     std::cout << "They are same!!" << std::endl;
   }
   else
   {
-    std::cout << "They are different!!" << std::endl;
+    std::cout << "a: " << a << std::endl;
+    std::cout << "b: " << b << std::endl;
+    std::cout << "e: " << e << std::endl;
+    std::cout << "g: " << g << std::endl;
+    std::cout << "h: " << h << std::endl;
+    std::cout << "f: " << f << std::endl;
+    std::cout << a.length()
+              << b.length()
+              << e.length()
+              << g.length()
+              << h.length()
+              << f.length();
   }
   return 0;
 }
