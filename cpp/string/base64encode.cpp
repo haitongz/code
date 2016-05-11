@@ -306,10 +306,11 @@ int main(int argc, char *argv[])
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
+  string h;
   gettimeofday(&start, NULL);
   for (int i = 0; i < LOOP_COUNT; ++i)
   {
-    g = Base64Encode5(s);
+    h = Base64Encode5(s);
   }
   //std::cout << "base64encoded: " << g << std::endl;
   gettimeofday(&end, NULL);
@@ -324,5 +325,14 @@ int main(int argc, char *argv[])
   //std::cout << "base64encoded: " << c << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64EncodeModp timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  if(a == b  && b == e && e == g && g == h && h == f)
+  {
+    std::cout << "They are same!!" << std::endl;
+  }
+  else
+  {
+    std::cout << "They are different!!" << std::endl;
+  }
   return 0;
 }
