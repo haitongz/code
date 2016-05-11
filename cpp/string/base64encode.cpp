@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
   {
     a = Base64Encode(s);
   }
-  std::cout << "base64encoded: " << a << std::endl;
+  //std::cout << "base64encoded: " << a << std::endl;
   gettimeofday(&end, NULL);
   std::cout << "Base64Encode timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
   {
     b = Base64Encode1(s);
   }
-  std::cout << "base64encoded: " << b << std::endl;
+  //std::cout << "base64encoded: " << b << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
   {
     e = Base64Encode2(s);
   }
-  std::cout << "base64encoded: " << e << std::endl;
+  //std::cout << "base64encoded: " << e << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode2 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
   {
     f = Base64Encode3(s);
   }
-  std::cout << "base64encoded: " << f << std::endl;
+  //std::cout << "base64encoded: " << f << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode3 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
   {
     g = Base64Encode4(s);
   }
-  std::cout << "base64encoded: " << g << std::endl;
+  //std::cout << "base64encoded: " << g << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
   {
     g = Base64Encode5(s);
   }
-  std::cout << "base64encoded: " << g << std::endl;
+  //std::cout << "base64encoded: " << g << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
   {
     Base64EncodeModp(s, &c);
   }
-  std::cout << "base64encoded: " << c << std::endl;
+  //std::cout << "base64encoded: " << c << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64EncodeModp timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
   return 0;
