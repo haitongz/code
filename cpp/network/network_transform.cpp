@@ -37,8 +37,8 @@ uint32_t IpToInt2(const string& ipStr)
 
 int main(int argc, char *argv[])
 {
-  //string ip_str = "192.168.3.233";
-  string ip_str = "127.0.0.1";
+  string ip_str = "192.168.3.233";
+  //string ip_str = "127.0.0.1";
 
   struct timeval start, end;
   gettimeofday(&start, NULL);
