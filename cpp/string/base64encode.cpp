@@ -206,7 +206,8 @@ std::string Base64Encode5(const std::string& src, std::string ending = "")
   const uint8_t *bytes = (const uint8_t *) src.c_str();
   uint32_t len = src.length();
 
-  std::string s((len+2)/3*4 + 1, '\0');
+  uint32_t encode_len = (len)/3*4;
+  std::string s(encode_len + 4, '\0');
   char* c = const_cast<char *>(s.data());
 
   while (len >= 3)
@@ -220,7 +221,13 @@ std::string Base64Encode5(const std::string& src, std::string ending = "")
   if (len > 0)
   {
     base64_encode(bytes, len, (uint8_t *)c);
+    s.erase(encode_len+len+1, std::string::npos);
   }
+  else
+  {
+    s.erase(encode_len, std::string::npos);
+  }
+
 
   s += ending;
 
@@ -312,9 +319,9 @@ int main(int argc, char *argv[])
   {
     h = Base64Encode5(s);
   }
-  //std::cout << "base64encoded: " << g << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64Encode5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << "base64encoded: " << g << std::endl;
 
   string c;
   gettimeofday(&start, NULL);
@@ -322,11 +329,11 @@ int main(int argc, char *argv[])
   {
     Base64EncodeModp(s, &c);
   }
-  //std::cout << "base64encoded: " << c << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " Base64EncodeModp timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << "base64encoded: " << c << std::endl;
 
-  if(a == b  && b == e && e == g && g == f)
+  if(a == b  && b == e && e == g && g == f && h == g)
   {
     std::cout << "They are same!!" << std::endl;
   }

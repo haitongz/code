@@ -23,13 +23,13 @@ inline static char toHex(const char &x)
 static const uint32_t   uri_component[] = {
   0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
 
-  /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
+              /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
   0xfc00dffe, /* 1111 1100 0000 0000  1101 1111 1111 1110 */
 
-  /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
+              /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
   0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
 
-  /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
+              /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
   0xb8000001, /* 1011 1000 0000 0000  0000 0000 0000 0001 */
 
   0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
@@ -249,8 +249,8 @@ std::string UrlEncoding4(const std::string &str_in, bool igore_percent_sign)
 
 int main ()
 {
-  std::string s1 = "http://mediav.com/?arg1=abc 效果个性化重定向&type=1&x=http://xx.xx";
-  std::string s = "http://is122ss.prod.mediav.com:8000/s?type=2&r=20&impid=bbfXLwMPwdI=&as=6&pf=TUUUUUUUUUU=&so=4&cus=174156_1127738_10970148_51447830_0&ctype=15&pinfo=&pub=116668_521691_1038920&mvid=MTA3MjQ2NzEzNTMxNDE5MjkwNDAwMTY&mv_ref=hao%2E360%2Ecn&enup=CAABynjgCggAAgrgeMoA&bidid=104ec3ab45e1eac9&price=AAAAAFcjQi0AAAAAAAHLbVAuonRYLa6DbHeabg==&finfo=DAABCAABAAAABQgAAgAAACMEAAM/HvWbW/E0UQAIAAIAAAADCgADhb/D/mokM28IAAQAAAApBgAGHxUIAAgAAMNQCgAJAAAAAAAAAIgGAAoAAAgACwAFfkAA&ugi=FfieDhW21z9MFQIVsgQVABUAAAA&uai=FZDpfiUCFQIW78vF+Ouz9MD0AQA&ubi=FZihFRX01IkBFciQuwoVrKCIMRUIFR4WiMqskwEW78u20LGAnsD0ATQMFpACFpC0ya8OAA&clickid=0&url=http%3A%2F%2Fwww%2Emeilele%2Ecom%2Fspecial%2F201510%2D1140%2Ehtml%23se%3Dqc%21XKJ%2D%21QDA7E588BFE68%21H%2D%21QBA2E594ADE8BF83E4B480E99%21H%2D3%21QAA7E7B%21H%21X%21QA8AE5B%21H2%2DJ10%2D%21X%21QE9EE5ACA8E69A8AE5B4A7E5A4A9E79D96E58%21H";
+  std::string s = "http://mediav.com/?arg1=abc 效 &type=1&x=http://xx.xx";
+  //std::string s = "http://is122ss.prod.mediav.com:8000/s?type=2&r=20&impid=bbfXLwMPwdI=&as=6&pf=TUUUUUUUUUU=&so=4&cus=174156_1127738_10970148_51447830_0&ctype=15&pinfo=&pub=116668_521691_1038920&mvid=MTA3MjQ2NzEzNTMxNDE5MjkwNDAwMTY&mv_ref=hao%2E360%2Ecn&enup=CAABynjgCggAAgrgeMoA&bidid=104ec3ab45e1eac9&price=AAAAAFcjQi0AAAAAAAHLbVAuonRYLa6DbHeabg==&finfo=DAABCAABAAAABQgAAgAAACMEAAM/HvWbW/E0UQAIAAIAAAADCgADhb/D/mokM28IAAQAAAApBgAGHxUIAAgAAMNQCgAJAAAAAAAAAIgGAAoAAAgACwAFfkAA&ugi=FfieDhW21z9MFQIVsgQVABUAAAA&uai=FZDpfiUCFQIW78vF+Ouz9MD0AQA&ubi=FZihFRX01IkBFciQuwoVrKCIMRUIFR4WiMqskwEW78u20LGAnsD0ATQMFpACFpC0ya8OAA&clickid=0&url=http%3A%2F%2Fwww%2Emeilele%2Ecom%2Fspecial%2F201510%2D1140%2Ehtml%23se%3Dqc%21XKJ%2D%21QDA7E588BFE68%21H%2D%21QBA2E594ADE8BF83E4B480E99%21H%2D3%21QAA7E7B%21H%21X%21QA8AE5B%21H2%2DJ10%2D%21X%21QE9EE5ACA8E69A8AE5B4A7E5A4A9E79D96E58%21H";
   std::cout << "encode_url: " << s << std::endl;
 
   struct timeval start, end;
