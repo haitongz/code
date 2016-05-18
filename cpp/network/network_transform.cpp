@@ -5,7 +5,7 @@
 #include <sys/time.h>
 
 using namespace std;
-const int LOOP_COUNT = 20000000;
+const int LOOP_COUNT = 2000;
 
 uint32_t IpToInt(const string& ipStr)
 {
@@ -95,7 +95,8 @@ int32_t IpToInt2(const string& ipStr)
 
 int main(int argc, char *argv[])
 {
-  string ip_str = "192.168.3.233";
+  string ip_str = "255.255.255.255";
+  //string ip_str = "";
   //string ip_str = "127.0.0.1";
 
   struct timeval start, end;
