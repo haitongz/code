@@ -2,3 +2,4 @@
 #g++ -O3 -std=c++11 url_encode.cpp -o urlencode.out
 #g++ -O3 -std=c++11 stringConcate.cpp -o concate.out
 g++ -O3 -std=c++11 base64decode.cpp modp_b64.cpp -o base64decode.out
+g++ -O3 -std=c++11 url_decode.cpp -o urldecode.out

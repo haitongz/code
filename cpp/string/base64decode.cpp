@@ -57,75 +57,6 @@ void base64_decode(uint8_t *buf, uint32_t len) {
   }
 }
 
-// range copy 使用更大的初始数组，encode时数组下标移动,最后一起string copy
-std::string Base64Encode4(const std::string& src, std::string ending = "")
-{
-  uint32_t i = 0;
-  const uint8_t *bytes = (const uint8_t *) src.c_str();
-  uint32_t len = src.length();
-
-  std::string s;
-  s.reserve(len/3*4 + 4);
-  uint32_t encode_len = (len/3)*4;
-  uint8_t c[encode_len];
-
-  while (len >= 3)
-  {
-    base64_encode(bytes, 3, &c[i]);
-    i += 4;
-    bytes += 3;
-    len -= 3;
-  }
-  if (encode_len)
-  {
-    s.append(reinterpret_cast<char const*>(c), encode_len);
-  }
-
-  uint8_t b[4];
-  if (len > 0)
-  {
-    base64_encode(bytes, len, b);
-    s.append(reinterpret_cast<char const*>(b),len+1);
-  }
-
-  s += ending;
-
-  return s;
-}
-
-std::string Base64Encode5(const std::string& src, std::string ending = "")
-{
-  const uint8_t *bytes = (const uint8_t *) src.c_str();
-  uint32_t len = src.length();
-
-  uint32_t encode_len = (len)/3*4;
-  std::string s(encode_len + 4, '\0');
-  char* c = const_cast<char *>(s.data());
-
-  while (len >= 3)
-  {
-    base64_encode(bytes, 3, (uint8_t *)c);
-    c += 4;
-    bytes += 3;
-    len -= 3;
-  }
-
-  if (len > 0)
-  {
-    base64_encode(bytes, len, (uint8_t *)c);
-    s.erase(encode_len+len+1, std::string::npos);
-  }
-  else
-  {
-    s.erase(encode_len, std::string::npos);
-  }
-
-
-  s += ending;
-
-  return s;
-}
-
 std::string Base64Decode(const std::string& src)
 {
   std::string buf(src.begin(), src.end());
@@ -194,6 +125,46 @@ std::string Base64Decode1(const std::string& src)
   return buf;
 }
 
+inline std::string Base64Decode2(const std::string& src)
+{
+  std::string buf(src.begin(), src.end());
+  uint32_t len = buf.size();
+  char* c = const_cast<char *>(buf.data());
+  char* d = c;
+
+  int leftover = len % 4;
+  if (leftover == 1)
+  {
+    buf.clear();
+    return buf;
+  }
+  uint32_t decode_len = leftover == 0 ? len/4*3 : len/4*3 + (leftover - 1);
+
+  while (len >= 4)
+  {
+    base64_decode((uint8_t *)c, 4);
+
+    for (int i = 0; i < 3; ++i)
+    {
+      *d++ = *c++;
+    }
+    c++;
+    len -= 4;
+  }
+
+  if (len > 1)
+  {
+    base64_decode((uint8_t *)c, len);
+    for (uint8_t i = 0; i < len - 1; i++)
+    {
+      *d++ = *c++;
+    }
+  }
+  buf.erase(decode_len, std::string::npos);
+
+  return buf;
+}
+
 
 
 int main(int argc, char *argv[])
@@ -207,7 +178,7 @@ int main(int argc, char *argv[])
   //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9tsaaa"
     //"1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.com";
   //std::string s = "zqus387489tid'23	tck=e02fce03a933b5c8fffdf46442a2e8e9ts1461052882959uunid4tid=23&tck=e02fce03a933b5c8fffdf46442a2e8e9&ts=1461052882959&ver=1ip:106.39.88.82hostname:tf41dg.prod.mediav.comaag";
-  string s = "enF1cwYzODc0ODkDdGlkJzIzCXRjaz1lMDJmY2UwM2E5MzNiNWM4ZmZmZGY0NjQ0MmEyZThlOQJ0czE0NjEwNTI4ODI5NTkFdXVuaWQDNHRpZD0yMyZ0Y2s9ZTAyZmNlMDNhOTMzYjVjOGZmZmRmNDY0NDJhMmU4ZTkmdHM9MTQ2MTA1Mjg4Mjk1OSZ2ZXI9MWlwOjEwNi4zOS44OC44MgFob3N0bmFtZTp0ZjQxZGcucHJvZC5tZWRpYXYuY29tAWFnZW50Ok1vemlsbGEvNS4wIChNYWNpbnRvc2g7IEludGVsIE1hYyBPUyBYIDEwXzExXzQpQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzQ5LjAuMjYyMy4xMTAgU2FmYXJpLzUzNy4zNgFsYW5nOmVuLHpoLUNOO3E9MC44LHpoO3E9MC42LHpoLVRXO3E9MC40AXJlZmVyZXI6aHR0cDovL2NrbWFwLm1lZGlhdi5jb20vYj90eXBlPTEwAXByb3h5OjEwNi4zOS44OC44MiwgMjAyLjc5LjIwMy4xMTFfbXZjdG4xOTEyNzA9X212c3JjPTExODIxNl81MjM2OThfMTA0MzQ0MCZfbXZjYW09MTkxMjcwXzEyNDE5NjFfMTE5NzA4MTBfNTg3NDA5NjlfMCZvc3I9b3FkVDBxaG1nemowJnRpbWU9MTQ0OTY1MDQ2NiZyZG9tPWFub255bW91czsgX212Y3RuMTY1NTY0PV9tdnNyYz0xMTg0NzhfNTI0MDAxXzEwNDQxMTImX212Y2FtPTE2NTU2NF8xMjI0OTQ4XzExNzc1MTUzXzU4ODQxOTk5XzAmb3NyPVpnNGMwY1M0OVYwMCZ0aW1lPTE0NTEwNDA1NzUmcmRvbT1hbm9ueW1vdXM7IHY9KWhlKChdXlhkcUIyZk9FPVtBalQ7IF9qenFhPTEuNDMzNjI3NDUxMTMxNzIzMjAwMC4xNDQ3MzM3NTI5LjE0NDczMzc1MjkuMTQ2MTA0NTUxNi4yOyBfanpxYz0xOyBfanpxY2ttcD0xOyBja210cz1QVVB0WEF6aSxQNlB0WEF6aSxSR1B0WEF6aSxSNlB0WEF6aSxVNlB0WEF6aSxKR1B0WEF6aSxKclB0WEF6aSxKNlB0WEF6aSxiVVB0WEF6aQN2ZXIBMQsCEDA6MHwwOjB8MDowfDA6MTALcCECCw8BB3ZlcnNpb24LAQMxLjAx";
+  string s = "enF1cwYzODc0ODkDdGlkJzIzCXRjaz1lMDJmY2UwM2E5MzNiNWM4ZmZmZGY0NjQ0MmEyZThlOQJ0czE0NjEwNTI4ODI5NTkFdXVuaWQDNHRpZD0yMyZ0Y2s9ZTAyZmNlMDNhOTMzYjVjOGZmZmRmNDY0NDJhMmU4ZTkmdHM9MTQ2MTA1Mjg4Mjk1OSZ2ZXI9MWlwOjEwNi4zOS44OC44MgFob3N0bmFtZTp0ZjQxZGcucHJvZC5tZWRpYXYuY29tAWFnZW50Ok1vemlsbGEvNS4wIChNYWNpbnRvc2g7IEludGVsIE1hYyBPUyBYIDEwXzExXzQpQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzQ5LjAuMjYyMy4xMTAgU2FmYXJpLzUzNy4zNgFsYW5nOmVuLHpoLUNOO3E9MC44LHpoO3E9MC42LHpoLVRXO3E9MC40AXJlZmVyZXI6aHR0cDovL2NrbWFwLm1lZGlhdi5jb20vYj90eXBlPTEwAXByb3h5OjEwNi4zOS44OC44MiwgMjAyLjc5LjIwMy4xMTFfbXZjdG4xOTEyNzA9X212c3JjPTExODIxNl81MjM2OThfMTA0MzQ0MCZfbXZjYW09MTkxMjcwXzEyNDE5NjFfMTE5NzA4MTBfNTg3NDA5NjlfMCZvc3I9b3FkVDBxaG1nemowJnRpbWU9MTQ0OTY1MDQ2NiZyZG9tPWFub255bW91czsgX212Y3RuMTY1NTY0PV9tdnNyYz0xMTg0NzhfNTI0MDAxXzEwNDQxMTImX212Y2FtPTE2NTU2NF8xMjI0OTQ4XzExNzc1MTUzXzU4ODQxOTk5XzAmb3NyPVpnNGMwY1M0OVYwMCZ0aW1lPTE0NTEwNDA1NzUmcmRvbT1hbm9ueW1vdXM7IHY9KWhlKChdXlhkcUIyZk9FPVtBalQ7IF9qenFhPTEuNDMzNjI3NDUxMTMxNzIzMjAwMC4xNDQ3MzM3NTI5LjE0NDczMzc1MjkuMTQ2MTA0NTUxNi4yOyBfanpxYz0xOyBfanpxY2ttcD0xOyBja210cz1QVVB0WEF6aSxQNlB0WEF6aSxSR1B0WEF6aSxSNlB0WEF6aSxVNlB0WEF6aSxKR1B0WEF6aSxKclB0WEF6aSxKNlB0WEF6aSxiVVB0WEF6aQN2ZXIBMQsCEDA6MHwwOjB8MDowfDA6MTALcCECCw8BB3ZlcnNpb24LAQMxLjA";
   //string s = "YWJjZGVm";
   string a;
   struct timeval start, end;
@@ -231,6 +202,16 @@ int main(int argc, char *argv[])
   gettimeofday(&end, NULL);
   std::cout << "Base64Decode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
   //std::cout << "base64decoded1: " << a << std::endl;
+  string a2;
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT; ++i)
+  {
+    a2 = Base64Decode2(s);
+  }
+  //std::cout << "base64encoded: " << a << std::endl;
+  gettimeofday(&end, NULL);
+  std::cout << "Base64Decode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
   if(a == a1)
   {
     std::cout << "They are same!!" << std::endl;
