@@ -125,7 +125,8 @@ std::string Base64Decode1(const std::string& src)
   return buf;
 }
 
-inline std::string Base64Decode2(const std::string& src)
+// use resize
+std::string Base64Decode2(const std::string& src)
 {
   std::string buf(src.begin(), src.end());
   uint32_t len = buf.size();
