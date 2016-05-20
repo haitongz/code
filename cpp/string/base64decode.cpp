@@ -160,7 +160,7 @@ inline std::string Base64Decode2(const std::string& src)
       *d++ = *c++;
     }
   }
-  buf.erase(decode_len, std::string::npos);
+  buf.resize(decode_len);
 
   return buf;
 }
@@ -210,9 +210,9 @@ int main(int argc, char *argv[])
   }
   //std::cout << "base64encoded: " << a << std::endl;
   gettimeofday(&end, NULL);
-  std::cout << "Base64Decode1 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << "Base64Decode2 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
-  if(a == a1)
+  if(a == a1 && a1 == a2)
   {
     std::cout << "They are same!!" << std::endl;
   }
