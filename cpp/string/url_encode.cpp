@@ -4,6 +4,9 @@
 #include <sstream>
 #include <sys/time.h>
 #include <stdint.h>
+#include <cassert>
+
+#define STACK_ARRAY(TYPE, LEN) static_cast<TYPE*>(::alloca((LEN)*sizeof(TYPE)))
 //url编码的主要内容是: 0-9A-Za-z以及-, ~, ., ~无需通过编码即可传输(普通字符), 而以下字符(保留字符):
 //! * ‘ ( ) ; : @ & = + $ , / ? # [ ]
 //如果要当作字符常量对待则需要经过编码. 另外其他的字符都需要进过url编码来进行传输.
@@ -247,10 +250,140 @@ std::string UrlEncoding4(const std::string &str_in, bool igore_percent_sign)
   return str_buffer;
 }
 
+// chromimum
+const unsigned char URL_UNSAFE  = 0x1; // 0-33 "#$%&+,/:;<=>?@[\]^`{|} 127
+const unsigned char XML_UNSAFE  = 0x2; // "&'<>
+const unsigned char HTML_UNSAFE = 0x2; // "&'<>
+
+//  ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 6 5 7 8 9 : ; < = > ?
+//@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _
+//` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~
+
+const unsigned char ASCII_CLASS[128] = {
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  0,0,3,1,1,1,3,2,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,3,1,3,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,
+};
+static const char HEX[] = "0123456789ABCDEF";
+char hex_encode(unsigned char val) {
+  assert(val < 16);
+  return (val < 16) ? HEX[val] : '!';
+}
+
+size_t url_encode(char * buffer, size_t buflen,
+                  const char * source, size_t srclen) {
+  if (NULL == buffer)
+    return srclen * 3 + 1;
+  if (buflen <= 0)
+    return 0;
+
+  size_t srcpos = 0, bufpos = 0;
+  while ((srcpos < srclen) && (bufpos + 1 < buflen)) {
+    unsigned char ch = source[srcpos++];
+
+    if ((ASCII_CLASS[ch] & URL_UNSAFE)) {
+      if (bufpos + 3 >= buflen) {
+        break;
+      }
+      buffer[bufpos+0] = '%';
+      buffer[bufpos+1] = hex_encode((ch >> 4) & 0xF);
+      buffer[bufpos+2] = hex_encode((ch     ) & 0xF);
+      bufpos += 3;
+    } else if (isspace(ch))
+    {
+      buffer[bufpos++] = '+';
+    }
+    else {
+      buffer[bufpos++] = ch;
+    }
+  }
+  buffer[bufpos] = '\0';
+  return bufpos;
+}
+
+
+typedef size_t (*Transform)(char * buffer, size_t buflen, const char * source, size_t srclen);
+size_t transform(std::string& value, size_t maxlen, const std::string& source,
+                 Transform t) {
+  char* buffer = STACK_ARRAY(char, maxlen + 1);
+  size_t length = t(buffer, maxlen + 1, source.data(), source.length());
+  value.assign(buffer, length);
+  return length;
+}
+
+std::string s_transform(const std::string& source, Transform t) {
+  // Ask transformation function to approximate the destination size (returns upper bound)
+  size_t maxlen = t(NULL, 0, source.data(), source.length());
+  char * buffer = STACK_ARRAY(char, maxlen);
+  size_t len = t(buffer, maxlen, source.data(), source.length());
+  std::string result(buffer, len);
+  return result;
+
+}
+
+inline std::string s_url_encode(const std::string& source) {
+  return s_transform(source, url_encode);
+}
+
+// chromium 2
+bool IsValidUrlChar(char ch, bool unsafe_only) {
+  if (unsafe_only) {
+    return !(ch <= ' ' || strchr("\\\"^&`<>[]{}", ch));
+  } else {
+    return isalnum(ch) || strchr("-_!~*'()", ch);
+  }
+}
+int InternalUrlEncode(const char *source, char *dest, unsigned int max,
+                      bool encode_space_as_plus, bool unsafe_only) {
+  static const char *digits = "0123456789ABCDEF";
+  if (max == 0) {
+    return 0;
+  }
+
+  char *start = dest;
+  while (static_cast<unsigned>(dest - start) < max && *source) {
+    unsigned char ch = static_cast<unsigned char>(*source);
+    if (*source == ' ' && encode_space_as_plus && !unsafe_only) {
+      *dest++ = '+';
+    } else if (IsValidUrlChar(ch, unsafe_only)) {
+      *dest++ = *source;
+    } else {
+      if (static_cast<unsigned>(dest - start) + 4 > max) {
+        break;
+      }
+      *dest++ = '%';
+      *dest++ = digits[(ch >> 4) & 0x0F];
+      *dest++ = digits[       ch & 0x0F];
+    }
+    source++;
+  }
+  assert(static_cast<unsigned int>(dest - start) < max);
+  *dest = 0;
+
+  return static_cast<int>(dest - start);
+}
+std::string
+InternalUrlEncodeString(const std::string & decoded,
+                        bool encode_space_as_plus,
+                        bool unsafe_only) {
+  int needed_length = static_cast<int>(decoded.length()) * 3 + 1;
+  char* buf = STACK_ARRAY(char, needed_length);
+  InternalUrlEncode(decoded.c_str(), buf, needed_length,
+                    encode_space_as_plus, unsafe_only);
+  return buf;
+}
+std::string
+UrlEncodeString(const std::string & decoded) {
+  return InternalUrlEncodeString(decoded, true, false);
+}
+
+
 int main ()
 {
-  std::string s = "http://mediav.com/?arg1=abc 效 &type=1&x=http://xx.xx";
-  //std::string s = "http://is122ss.prod.mediav.com:8000/s?type=2&r=20&impid=bbfXLwMPwdI=&as=6&pf=TUUUUUUUUUU=&so=4&cus=174156_1127738_10970148_51447830_0&ctype=15&pinfo=&pub=116668_521691_1038920&mvid=MTA3MjQ2NzEzNTMxNDE5MjkwNDAwMTY&mv_ref=hao%2E360%2Ecn&enup=CAABynjgCggAAgrgeMoA&bidid=104ec3ab45e1eac9&price=AAAAAFcjQi0AAAAAAAHLbVAuonRYLa6DbHeabg==&finfo=DAABCAABAAAABQgAAgAAACMEAAM/HvWbW/E0UQAIAAIAAAADCgADhb/D/mokM28IAAQAAAApBgAGHxUIAAgAAMNQCgAJAAAAAAAAAIgGAAoAAAgACwAFfkAA&ugi=FfieDhW21z9MFQIVsgQVABUAAAA&uai=FZDpfiUCFQIW78vF+Ouz9MD0AQA&ubi=FZihFRX01IkBFciQuwoVrKCIMRUIFR4WiMqskwEW78u20LGAnsD0ATQMFpACFpC0ya8OAA&clickid=0&url=http%3A%2F%2Fwww%2Emeilele%2Ecom%2Fspecial%2F201510%2D1140%2Ehtml%23se%3Dqc%21XKJ%2D%21QDA7E588BFE68%21H%2D%21QBA2E594ADE8BF83E4B480E99%21H%2D3%21QAA7E7B%21H%21X%21QA8AE5B%21H2%2DJ10%2D%21X%21QE9EE5ACA8E69A8AE5B4A7E5A4A9E79D96E58%21H";
+  //std::string s = "http://mediav.com/?arg1=abc 效 &type=1&x=http://xx.xx";
+  //std::string s = "效";
+  std::string s = "http://is122ss.prod.mediav.com:8000/s?type=2&r=20&impid=bbfXLwMPwdI=&as=6&pf=TUUUUUUUUUU=&so=4&cus=174156_1127738_10970148_51447830_0&ctype=15&pinfo=&pub=116668_521691_1038920&mvid=MTA3MjQ2NzEzNTMxNDE5MjkwNDAwMTY&mv_ref=hao%2E360%2Ecn&enup=CAABynjgCggAAgrgeMoA&bidid=104ec3ab45e1eac9&price=AAAAAFcjQi0AAAAAAAHLbVAuonRYLa6DbHeabg==&finfo=DAABCAABAAAABQgAAgAAACMEAAM/HvWbW/E0UQAIAAIAAAADCgADhb/D/mokM28IAAQAAAApBgAGHxUIAAgAAMNQCgAJAAAAAAAAAIgGAAoAAAgACwAFfkAA&ugi=FfieDhW21z9MFQIVsgQVABUAAAA&uai=FZDpfiUCFQIW78vF+Ouz9MD0AQA&ubi=FZihFRX01IkBFciQuwoVrKCIMRUIFR4WiMqskwEW78u20LGAnsD0ATQMFpACFpC0ya8OAA&clickid=0&url=http%3A%2F%2Fwww%2Emeilele%2Ecom%2Fspecial%2F201510%2D1140%2Ehtml%23se%3Dqc%21XKJ%2D%21QDA7E588BFE68%21H%2D%21QBA2E594ADE8BF83E4B480E99%21H%2D3%21QAA7E7B%21H%21X%21QA8AE5B%21H2%2DJ10%2D%21X%21QE9EE5ACA8E69A8AE5B4A7E5A4A9E79D96E58%21H";
   std::cout << "encode_url: " << s << std::endl;
 
   struct timeval start, end;
@@ -299,5 +432,14 @@ int main ()
   std::cout << encoded_url << std::endl;
   gettimeofday(&end, NULL);
   std::cout << " UrlEncoding4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT; ++i)
+  {
+    encoded_url = UrlEncodeString(s);
+  }
+  std::cout << encoded_url << std::endl;
+  gettimeofday(&end, NULL);
+  std::cout << " UrlEncoding5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
   return 0;
 }
