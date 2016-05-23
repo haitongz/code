@@ -231,7 +231,7 @@ std::string
 InternalUrlDecodeString2(const std::string & encoded,
                         bool encode_space_as_plus) {
   size_t needed_length = encoded.length() + 1;
-  std::string s(needed_length, '\0');
+  std::string s(needed_length, 0);
   char* buf = const_cast<char *>(s.data());
   int length = InternalUrlDecode(encoded.c_str(), buf, encode_space_as_plus);
   s.erase(length);
