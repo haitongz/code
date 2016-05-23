@@ -228,12 +228,28 @@ InternalUrlDecodeString1(const std::string & encoded,
 }
 
 std::string
+InternalUrlDecodeString2(const std::string & encoded,
+                        bool encode_space_as_plus) {
+  size_t needed_length = encoded.length() + 1;
+  std::string s(needed_length, '\0');
+  char* buf = const_cast<char *>(s.data());
+  int length = InternalUrlDecode(encoded.c_str(), buf, encode_space_as_plus);
+  s.erase(length);
+  return s;
+}
+
+std::string
 UrlDecodeString(const std::string & encoded) {
   return InternalUrlDecodeString(encoded, true);
 }
 std::string
 UrlDecodeString2(const std::string & encoded) {
   return InternalUrlDecodeString1(encoded, true);
+}
+
+std::string
+UrlDecodeString3(const std::string & encoded) {
+  return InternalUrlDecodeString2(encoded, true);
 }
 
 bool hex_decode(char ch, unsigned char* val)
@@ -370,7 +386,15 @@ int main ()
   gettimeofday(&end, NULL);
   std::cout << "url_decode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
-  if (r1 == r2 && r2 == r3 && r3 == r4 && r4 == r5)
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT1; ++i)
+  {
+    r6 = UrlDecodeString3(s);
+  }
+  gettimeofday(&end, NULL);
+  std::cout << "url_decode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  if (r1 == r2 && r2 == r3 && r3 == r4 && r4 == r5 && r5 == r6)
   {
     std::cout << "result same!!!"  << std::endl;
   }
