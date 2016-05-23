@@ -233,7 +233,7 @@ UrlDecodeString(const std::string & encoded) {
 }
 std::string
 UrlDecodeString2(const std::string & encoded) {
-  return InternalUrlDecodeString(encoded, true);
+  return InternalUrlDecodeString1(encoded, true);
 }
 
 bool hex_decode(char ch, unsigned char* val)
@@ -289,13 +289,13 @@ typedef size_t (*Transform)(char * buffer, size_t buflen,
 //// Return the result of applying transform t to source.
 //std::string s_transform(const std::string& source, Transform t);
 
-size_t transform(std::string& value, size_t maxlen, const std::string& source,
-                 Transform t) {
-  char* buffer = STACK_ARRAY(char, maxlen + 1);
-  size_t length = t(buffer, maxlen + 1, source.data(), source.length());
-  value.assign(buffer, length);
-  return length;
-}
+//size_t transform(std::string& value, size_t maxlen, const std::string& source,
+                 //Transform t) {
+  //char* buffer = STACK_ARRAY(char, maxlen + 1);
+  //size_t length = t(buffer, maxlen + 1, source.data(), source.length());
+  //value.assign(buffer, length);
+  //return length;
+//}
 
 std::string s_transform(const std::string& source, Transform t) {
   // Ask transformation function to approximate the destination size (returns upper bound)
