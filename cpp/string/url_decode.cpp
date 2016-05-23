@@ -392,7 +392,7 @@ int main ()
     r6 = UrlDecodeString3(s);
   }
   gettimeofday(&end, NULL);
-  std::cout << "url_decode4 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+  std::cout << "url_decode5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
   if (r1 == r2 && r2 == r3 && r3 == r4 && r4 == r5 && r5 == r6)
   {
