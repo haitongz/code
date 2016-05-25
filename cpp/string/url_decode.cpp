@@ -246,7 +246,7 @@ InternalUrlDecodeString3(const std::string & encoded,
   char* buf = const_cast<char *>(s.data());
   int length = InternalUrlDecode(encoded.c_str(), buf, encode_space_as_plus);
   s.erase(length);
-  return std::move(s);
+  return s;
 }
 
 std::string
