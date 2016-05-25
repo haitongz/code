@@ -239,6 +239,17 @@ InternalUrlDecodeString2(const std::string & encoded,
 }
 
 std::string
+InternalUrlDecodeString3(const std::string & encoded,
+                        bool encode_space_as_plus) {
+  size_t needed_length = encoded.length() + 1;
+  std::string s(needed_length, 0);
+  char* buf = const_cast<char *>(s.data());
+  int length = InternalUrlDecode(encoded.c_str(), buf, encode_space_as_plus);
+  s.erase(length);
+  return std::move(s);
+}
+
+std::string
 UrlDecodeString(const std::string & encoded) {
   return InternalUrlDecodeString(encoded, true);
 }
@@ -250,6 +261,11 @@ UrlDecodeString2(const std::string & encoded) {
 std::string
 UrlDecodeString3(const std::string & encoded) {
   return InternalUrlDecodeString2(encoded, true);
+}
+
+std::string
+UrlDecodeString4(const std::string & encoded) {
+  return std::move(InternalUrlDecodeString3(encoded, true));
 }
 
 bool hex_decode(char ch, unsigned char* val)
@@ -333,7 +349,7 @@ int main ()
   std::string s = "http://is122ss.prod.mediav.com:8000/s?type=2&r=20&impid=bbfXLwMPwdI=&as=6&pf=TUUUUUUUUUU=&so=4&cus=174156_1127738_10970148_51447830_0&ctype=15&pinfo=&pub=116668_521691_1038920&mvid=MTA3MjQ2NzEzNTMxNDE5MjkwNDAwMTY&mv_ref=hao%2E360%2Ecn&enup=CAABynjgCggAAgrgeMoA&bidid=104ec3ab45e1eac9&price=AAAAAFcjQi0AAAAAAAHLbVAuonRYLa6DbHeabg==&finfo=DAABCAABAAAABQgAAgAAACMEAAM/HvWbW/E0UQAIAAIAAAADCgADhb/D/mokM28IAAQAAAApBgAGHxUIAAgAAMNQCgAJAAAAAAAAAIgGAAoAAAgACwAFfkAA&ugi=FfieDhW21z9MFQIVsgQVABUAAAA&uai=FZDpfiUCFQIW78vF+Ouz9MD0AQA&ubi=FZihFRX01IkBFciQuwoVrKCIMRUIFR4WiMqskwEW78u20LGAnsD0ATQMFpACFpC0ya8OAA&clickid=0&url=http%3A%2F%2Fwww%2Emeilele%2Ecom%2Fspecial%2F201510%2D1140%2Ehtml%23se%3Dqc%21XKJ%2D%21QDA7E588BFE68%21H%2D%21QBA2E594ADE8BF83E4B480E99%21H%2D3%21QAA7E7B%21H%21X%21QA8AE5B%21H2%2DJ10%2D%21X%21QE9EE5ACA8E69A8AE5B4A7E5A4A9E79D96E58%21H";
   std::cout << "encode_url: " << s << std::endl;
 
-  string r1, r2, r3, r4, r5, r6;
+  string r1, r2, r3, r4, r5, r6, r7;
   struct timeval start, end;
   gettimeofday(&start, NULL);
   string encoded_url;
@@ -394,7 +410,15 @@ int main ()
   gettimeofday(&end, NULL);
   std::cout << "url_decode5 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
 
-  if (r1 == r2 && r2 == r3 && r3 == r4 && r4 == r5 && r5 == r6)
+  gettimeofday(&start, NULL);
+  for (int i = 0; i < LOOP_COUNT1; ++i)
+  {
+    r7 = UrlDecodeString4(s);
+  }
+  gettimeofday(&end, NULL);
+  std::cout << "url_decode6 timeuse: " << 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) << std::endl;
+
+  if (r1 == r2 && r2 == r3 && r3 == r4 && r4 == r5 && r5 == r6 && r6 == r7)
   {
     std::cout << "result same!!!"  << std::endl;
   }
