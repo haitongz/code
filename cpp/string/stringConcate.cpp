@@ -3,7 +3,12 @@
 #include <sys/time.h>
 #include <sstream>
 #include <stdio.h>
+#include "concat.h"
+
 using namespace std;
+using namespace theypsilon;
+using namespace std;
+
 #define OUT_IN_REPEATE_NUM 1000000
 #define IN_REPEATE_NUM 60
 
@@ -27,6 +32,13 @@ void  appendTest(string& ret)
         ret.append(s2);
         ret.append(s3);
     }
+}
+void  addTest(string& ret)
+{
+  for(int i=0; i<IN_REPEATE_NUM; i++)
+  {
+    ret = s1 + s2 + s3;
+  }
 }
 void sprintfTest(string& ret)
 {
@@ -53,8 +65,16 @@ void  ssTest(string& ret)
     }
     ret = ss.str();
 }
+
+void  concatTest(string& ret)
+{
+    for(int i=0; i<IN_REPEATE_NUM; i++)
+    {
+        ret = concat(s1, s2, s3);
+    }
+}
 int main() {
-    string ss, plus, append, sprintf;
+    string ss, plus, append, sprintf, concat, add;
     struct timeval sTime, eTime;
 
     gettimeofday(&sTime, NULL);
@@ -93,11 +113,31 @@ int main() {
     gettimeofday(&eTime, NULL);
     long PlusTime = (eTime.tv_sec-sTime.tv_sec)*1000000+(eTime.tv_usec-sTime.tv_usec); //exeTime 单位是微秒
 
+    gettimeofday(&sTime, NULL);
+    for(int i=0; i<OUT_IN_REPEATE_NUM; i++)
+    {
+        concat="";
+        concatTest(concat);
+    }
+    gettimeofday(&eTime, NULL);
+    long concatTime = (eTime.tv_sec-sTime.tv_sec)*1000000+(eTime.tv_usec-sTime.tv_usec); //exeTime 单位是微秒
+
+    gettimeofday(&sTime, NULL);
+    for(int i=0; i<OUT_IN_REPEATE_NUM; i++)
+    {
+        add="";
+        concatTest(add);
+    }
+    gettimeofday(&eTime, NULL);
+    long addTime = (eTime.tv_sec-sTime.tv_sec)*1000000+(eTime.tv_usec-sTime.tv_usec); //exeTime 单位是微秒
+
     cout<<"PlusTime is :   "<<PlusTime<<endl;
     cout<<"AppendTime is : "<<AppendTime<<endl;
     cout<<"SsTime is :     "<<SsTime<<endl;
     cout<<"SprintfTime is :"<<SprintfTime<<endl;
-    if(ss==sprintf && append==plus && ss==plus)
+    cout<<"ConcatTime is :"<<concatTime<<endl;
+    cout<<"AddTime is :"<<addTime<<endl;
+    if(ss==sprintf && append==plus && ss==plus && plus == concat && plus == add)
     {
         cout<<"They are same"<<endl;
     }
